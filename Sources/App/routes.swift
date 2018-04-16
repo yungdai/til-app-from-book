@@ -6,6 +6,10 @@ import Vapor
 /// [Learn More →](https://docs.vapor.codes/3.0/getting-started/structure/#routesswift)
 public func routes(_ router: Router) throws {
     
+    // Basic "Hello, world!" example
+    router.get("hello") { req in
+        return "Hello, world!"
+    }
     
     // register a new route at /api/acronyms that accepts a post request and return a Future<Acronym>, it will return an acronym once it is saved
     router.post("api", "acronyms") { request -> Future<Acronym> in
