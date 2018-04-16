@@ -5,14 +5,16 @@ import Vapor
 ///
 /// [Learn More →](https://docs.vapor.codes/3.0/getting-started/structure/#routesswift)
 public func routes(_ router: Router) throws {
-    // Basic "Hello, world!" example
-    router.get("hello") { req in
-        return "Hello, world!"
+    
+    
+    // register a new route at /api/acronyms that accepts a post request and return a Future<Acronym>, it will return an acronym once it is saved
+    router.post("api", "acronyms") { request -> Future<Acronym> in
+        
+        return try request.content.decode(Acronym.self).flatMap(to: Acronym.self) { acronym in
+            
+            // save the model using fluent and returning the acronym model once it is saved
+            return acronym.save(on: request)
+        }
     }
 
-    // Example of configuring a controller
-    let todoController = TodoController()
-    router.get("todos", use: todoController.index)
-    router.post("todos", use: todoController.create)
-    router.delete("todos", Todo.parameter, use: todoController.delete)
 }
