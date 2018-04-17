@@ -16,6 +16,7 @@ struct AcronymsController: RouteCollection {
         acronymRoutes.get("search", use: searchHandler)
         acronymRoutes.get("first", use: getFirstHandler)
         acronymRoutes.get("sort", use: sortHandler)
+        acronymRoutes.get(Acronym.parameter, "user", use: getUserHandler)
     }
     
     // CREATE
@@ -47,6 +48,7 @@ struct AcronymsController: RouteCollection {
             // update the found acronym with the updated model for saved acronym
             acronym.short = updatedAcronym.short
             acronym.long = updatedAcronym.long
+            acronym.userID = updatedAcronym.userID
             
             return acronym.save(on: request)
         }
@@ -107,5 +109,17 @@ struct AcronymsController: RouteCollection {
         return try Acronym.query(on: request)
         .sort(\.short, .ascending)
         .all()
+    }
+    
+    // GET User
+    func getUserHandler(_ request: Request) throws -> Future<User> {
+        
+        
+        // find a Acronym by number
+        return try request.parameter(Acronym.self)
+            .flatMap(to: User.self) { acronym in
+                // return a user from the retrieved acronym
+                try acronym.user.get(on: request)
+        }
     }
 }

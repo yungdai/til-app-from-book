@@ -69,5 +69,6 @@ public func configure(
     
     // changed to postgreSQL
     migrations.add(model: Acronym.self, database: .psql)
+    migrations.add(model: User.self, database: .psql)
     services.register(migrations)
 }
