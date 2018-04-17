@@ -27,7 +27,7 @@ public func configure(
 
     // to create a new docker database for postgress use the following line
     // docker run --name postgres -e POSTGRES_DB=vapor -e POSTGRES_USER=vapor -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
-=
+
     /// Info about deployment
     //    app: TIL
     //    git: https://github.com/yungdai/til-app-from-book.git
