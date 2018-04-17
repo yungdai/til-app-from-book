@@ -62,4 +62,10 @@ extension Acronym: Migration {
             try builder.addReference(from: \.userID, to: \User.id)
         }
     }
+    
+    // add a categories sibling from the pivot
+    // add a computered property to Acronym to get an acronym's categories.  This returns Fluent's generic Siblin type.   It returns the siblings of an acronym that are a type of Category and held usng the AcronymCategoriesPivot
+    var categories: Siblings<Acronym, Category, AcronymCategoryPivot> {
+        return siblings()
+    }
 }

@@ -17,6 +17,8 @@ struct AcronymsController: RouteCollection {
         acronymRoutes.get("first", use: getFirstHandler)
         acronymRoutes.get("sort", use: sortHandler)
         acronymRoutes.get(Acronym.parameter, "user", use: getUserHandler)
+        acronymRoutes.post(Acronym.parameter, "categories", Category.parameter, use: addCategoriesHandler)
+        acronymRoutes.get(Acronym.parameter, "categories", use: getCategoriesHandler)
     }
     
     // CREATE
@@ -119,6 +121,31 @@ struct AcronymsController: RouteCollection {
             .flatMap(to: User.self) { acronym in
                 // return a user from the retrieved acronym
                 try acronym.user.get(on: request)
+        }
+    }
+    
+    // ADD Category for Pivot
+    func addCategoriesHandler(_ request: Request) throws -> Future<HTTPStatus> {
+        
+        // extract both the acronym and the category from their parameters
+        return try flatMap(to: HTTPStatus.self, request.parameter(Acronym.self), request.parameter(Category.self)) { acronym, category in
+            
+            // create a new AcronymCategoryPivot object, use .requireID() on the model to ensure that the ID's have been set.
+            let pivot = try AcronymCategoryPivot(acronym.requireID(), category.requireID())
+            
+            // save the pivot and have the result be a 201 created result
+            return pivot.save(on: request).transform(to: .created)
+        }
+    }
+    
+    // GET Categories
+    func getCategoriesHandler(_ request: Request) throws -> Future<[Category]> {
+        
+        // Extract acronym from the request parameter
+        return try request.parameter(Acronym.self)
+            .flatMap(to: [Category].self) { acronym in
+                // use the computed property to get the categories then use a Fluent query to return Categories
+                try acronym.categories.query(on: request).all()
         }
     }
 }
