@@ -6,10 +6,12 @@ final class Acronym: Codable {
     var id: Int?
     var short: String
     var long: String
+    var userID: User.ID
     
-    init(short: String, long: String) {
+    init(short: String, long: String, userID: User.ID) {
         self.short = short
         self.long = long
+        self.userID = userID
     }
 }
 
@@ -28,8 +30,36 @@ final class Acronym: Codable {
 
 // you can use this way to do it quickly
 extension Acronym: PostgreSQLModel {}
-extension Acronym: Migration {}
 extension Acronym: Content {}
 
 // add type safety for parameters
 extension Acronym: Parameter {}
+
+// add User parent relationship to Acronyms
+extension Acronym {
+    
+    // add a computered property to acronym to get the user object of the acronym's owner.  This returns fluent's generic Parent Type
+    var user: Parent<Acronym, User> {
+        // Users Flurent's parent function to retreive the parent.  This take the keypath of the user reference on the acronym.
+        return parent(\.userID)
+    }
+}
+
+extension Acronym: Migration {
+    
+    
+    // add a function for foreign key constraints
+    // impliment prepare(on
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+        
+        // create table for Acronym in the database
+        return Database.create(self, on: connection) { builder in
+            
+            // add all the fields to the database for acronym.
+            try addProperties(to: builder)
+            
+            // add reference between the userID propery on Acronym and the id properly on the User
+            try builder.addReference(from: \.userID, to: \User.id)
+        }
+    }
+}
