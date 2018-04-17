@@ -30,7 +30,6 @@ final class Acronym: Codable {
 
 // you can use this way to do it quickly
 extension Acronym: PostgreSQLModel {}
-extension Acronym: Migration {}
 extension Acronym: Content {}
 
 // add type safety for parameters
@@ -43,5 +42,24 @@ extension Acronym {
     var user: Parent<Acronym, User> {
         // Users Flurent's parent function to retreive the parent.  This take the keypath of the user reference on the acronym.
         return parent(\.userID)
+    }
+}
+
+extension Acronym: Migration {
+    
+    
+    // add a function for foreign key constraints
+    // impliment prepare(on
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+        
+        // create table for Acronym in the database
+        return Database.create(self, on: connection) { builder in
+            
+            // add all the fields to the database for acronym.
+            try addProperties(to: builder)
+            
+            // add reference between the userID propery on Acronym and the id properly on the User
+            try builder.addReference(from: \.userID, to: \User.id)
+        }
     }
 }
