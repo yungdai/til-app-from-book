@@ -65,17 +65,11 @@ public func configure(
     
     /// Configure migrations
     var migrations = MigrationConfig()
-    
-    // changed to postgreSQL
-    
-    // User table must be created first for the Foreign key constraints
     migrations.add(model: User.self, database: .psql)
     migrations.add(model: Acronym.self, database: .psql)
-
     services.register(migrations)
     
     // Configure the rest of your application here:
-    
     // create a CommandConfig with the default configuration
     var commandConfig = CommandConfig.default()
     // Add the revert command with the identifier revert.  This is the string you use to to invoke the command
