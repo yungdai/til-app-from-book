@@ -25,4 +25,18 @@ final class AcronymCategoryPivot: PostgreSQLUUIDPivot {
     }
 }
 
-extension AcronymCategoryPivot: Migration {}
+extension AcronymCategoryPivot: Migration {
+    
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+    
+        return Database.create(self, on: connection) { builder in
+            
+            try addProperties(to: builder)
+            
+            try builder.addReference(from: \.acronymID, to: \Acronym.id)
+            
+            try builder.addReference(from: \.categoryID, to: \Category.id)
+        }
+    }
+    
+}

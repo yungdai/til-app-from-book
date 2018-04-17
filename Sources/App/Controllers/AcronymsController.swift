@@ -18,6 +18,7 @@ struct AcronymsController: RouteCollection {
         acronymRoutes.get("sort", use: sortHandler)
         acronymRoutes.get(Acronym.parameter, "user", use: getUserHandler)
         acronymRoutes.post(Acronym.parameter, "categories", Category.parameter, use: addCategoriesHandler)
+        acronymRoutes.get(Acronym.parameter, "categories", use: getCategoriesHandler)
     }
     
     // CREATE
@@ -134,6 +135,17 @@ struct AcronymsController: RouteCollection {
             
             // save the pivot and have the result be a 201 created result
             return pivot.save(on: request).transform(to: .created)
+        }
+    }
+    
+    // GET Categories
+    func getCategoriesHandler(_ request: Request) throws -> Future<[Category]> {
+        
+        // Extract acronym from the request parameter
+        return try request.parameter(Acronym.self)
+            .flatMap(to: [Category].self) { acronym in
+                // use the computed property to get the categories then use a Fluent query to return Categories
+                try acronym.categories.query(on: request).all()
         }
     }
 }
