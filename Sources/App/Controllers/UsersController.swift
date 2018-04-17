@@ -10,11 +10,11 @@ struct UsersController: RouteCollection {
         userRoutes.post(User.self, use: createHandler)
         userRoutes.get(use: getAllHandler)
         userRoutes.get(User.parameter, use: getHandler)
+        userRoutes.get(User.parameter, "acronyms", use: getAcronymsHandler)
     }
     
     // CREATE
     func createHandler(_ request: Request, user: User) throws -> Future<User> {
-        
         return user.save(on: request)
     }
     
@@ -28,4 +28,12 @@ struct UsersController: RouteCollection {
         return try request.parameter(User.self)
     }
     
+    // GET Acronym from User
+    func getAcronymsHandler(_ request: Request) throws -> Future<[Acronym]> {
+        //  Feth the user specified in the request's paramaters and unwarp the returned future.
+        return try request.parameter(User.self)
+            .flatMap(to: [Acronym].self) { user in
+                try user.acronyms.query(on: request).all()
+        }
+    }
 }
