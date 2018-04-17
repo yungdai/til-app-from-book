@@ -1,5 +1,6 @@
 import Routing
 import Vapor
+import Fluent
 
 /// Register your application's routes here.
 ///
@@ -66,5 +67,47 @@ public func routes(_ router: Router) throws {
                     .transform(to: HTTPStatus.noContent)
             
         }
+    }
+    
+    // SEARCH
+    // register a router for a GET at /api/acronyms/search  returns a Future<[Acronym]>
+    router.get("api", "acronyms", "search") { request -> Future<[Acronym]> in
+        
+        // retrieve the search term from the URL query string.  You can do this with any Codable object by calling request.query.decode(_:).  If there is a failure it will throw a 400 Bad Request Error
+        guard let searchTerm = request.query[String.self, at: "term"] else {
+            throw Abort(.badRequest)
+        }
+        
+        return try Acronym.query(on: request).group(.or) { or in
+            try or.filter(\.short == searchTerm)
+            try or.filter(\.long == searchTerm)
+            }.all()
+    }
+    
+    // SEARCH First
+    // register a router for a get command at /api/acronyms/first that returns an acronym from the first acronym
+    router.get("api", "acronyms", "first") { request -> Future<Acronym> in
+        
+        // perform a querey for the first acronym and then use map to unwrap the result of the query which will return a acronym.
+        return Acronym.query(on: request).first().map(to: Acronym.self) { acronym in
+            
+            // if the there is no acronym (because acronym is a nil) then throw a 404 Not Found Error
+            guard let acronym = acronym else {
+                throw Abort(.notFound)
+            }
+            
+            // return the found acronym
+            return acronym
+        }
+    }
+    
+    // SORTING RESULTS
+    // register a router to /api/acronyms/sorted that returns a Future<[Acronym]>
+    router.get("api", "acronyms", "sorted") { request -> Future<[Acronym]> in
+        
+        // create a query that sorts all short properties in .ascending order
+        return try Acronym.query(on: request)
+        .sort(\.short, .ascending)
+        .all()
     }
 }
