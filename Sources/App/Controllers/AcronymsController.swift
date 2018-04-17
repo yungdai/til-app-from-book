@@ -113,8 +113,7 @@ struct AcronymsController: RouteCollection {
     
     // GET User
     func getUserHandler(_ request: Request) throws -> Future<User> {
-        
-        
+  
         // find a Acronym by number
         return try request.parameter(Acronym.self)
             .flatMap(to: User.self) { acronym in
